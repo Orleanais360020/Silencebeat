@@ -3,98 +3,83 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>武蔵野線 空き号車予測</title>
+<title>武蔵野線 JR速報値監視</title>
 <style>
-:root{--bg:#f5f7f4;--ink:#17211d;--muted:#62706a;--line:#d7dfda;--panel:#fff;--soft:#edf4ef;--green:#18724f;--teal:#168278;--blue:#2e6d9d;--amber:#b87713;--orange:#c6562b;--red:#a63242;--shadow:0 16px 38px rgba(24,38,31,.12)}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI","Yu Gothic",Meiryo,sans-serif}button,input,select{font:inherit}button{cursor:pointer}.wrap{width:min(1120px,calc(100% - 28px));margin:0 auto;padding:22px 0 38px}.hero{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start;padding:14px 0 16px}.hero h1{margin:4px 0 8px;font-size:2rem;line-height:1.1}.eyebrow,.label{margin:0;color:var(--muted);font-size:.78rem;font-weight:800}.notice{margin:0;max-width:780px;color:var(--muted);line-height:1.65}.badge{border:1px solid var(--line);border-radius:999px;background:#fff;padding:8px 12px;color:var(--green);font-weight:800;white-space:nowrap}.controls,.result,.train,.details{border:1px solid var(--line);border-radius:8px;background:var(--panel);box-shadow:var(--shadow)}.controls{display:grid;grid-template-columns:1.1fr .7fr .7fr auto;gap:12px;padding:14px}.field{display:grid;gap:6px}.field span{color:var(--muted);font-size:.78rem;font-weight:800}.seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;border:1px solid var(--line);border-radius:8px;background:#f0f4f2;padding:4px}.seg button,.primary,.feedback button,.car{border:0;border-radius:6px;font-weight:800}.seg button{min-height:40px;background:transparent;color:var(--muted)}.seg button.active{background:#fff;color:var(--green);box-shadow:0 2px 9px rgba(26,70,47,.12)}select,input{width:100%;min-height:44px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink);padding:0 12px}.primary{align-self:end;min-height:44px;background:var(--green);color:#fff;padding:0 18px}.result{display:grid;grid-template-columns:1fr 340px;gap:0;margin:16px 0;overflow:hidden}.rec{padding:20px}.rec-main{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:baseline;margin:4px 0 10px}.rec-main strong{font-size:2.45rem;color:var(--green);line-height:1}.rec-main span{font-weight:800}.reason{margin:0;color:var(--muted);line-height:1.65}.facts{display:grid;grid-template-columns:1fr}.facts div{display:grid;gap:4px;align-content:center;min-height:74px;padding:14px 16px;border-top:1px solid var(--line)}.facts div:first-child{border-top:0}.facts span{color:var(--muted);font-size:.78rem;font-weight:800}.facts strong{font-size:1.08rem}.train{padding:18px}.train-head{display:flex;justify-content:space-between;gap:16px;align-items:end;margin-bottom:14px}.train-head h2,.details h2{margin:3px 0 0;font-size:1.08rem}.cars{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px}.car{display:grid;grid-template-rows:auto auto 1fr auto;gap:7px;min-height:166px;padding:11px 9px;border:1px solid var(--line);background:#fbfcfb;text-align:left;color:var(--ink)}.car.selected{outline:3px solid rgba(24,114,79,.2);border-color:var(--green);background:var(--soft)}.car.best{border-color:var(--green)}.num{display:flex;justify-content:space-between;gap:6px;align-items:baseline}.num strong{font-size:1.25rem}.num span{color:var(--muted);font-size:.72rem}.score{color:var(--muted);font-size:.78rem}.meter{min-height:56px;border-radius:7px;background:linear-gradient(to top,var(--c)var(--fill),transparent var(--fill)),#e8eeeb}.level{min-height:34px;font-size:.78rem;font-weight:800;line-height:1.35}.details{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:16px;overflow:hidden}.panel{padding:18px}.panel+.panel{border-left:1px solid var(--line)}.panel p{margin:8px 0 0;color:var(--muted);line-height:1.65}.feedback{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}.feedback button{min-height:42px;border:1px solid var(--line);background:#f8faf8}.data-list{display:grid;gap:8px;margin-top:12px}.data-row{display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:start;padding:10px;border:1px solid var(--line);border-radius:7px;background:#fbfcfb}.data-row b{font-size:.86rem}.data-row span{color:var(--muted);font-size:.9rem;line-height:1.55}.route-line{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-weight:900;color:var(--green)}.route-line i{display:block;width:46px;height:6px;border-radius:999px;background:linear-gradient(90deg,var(--green),var(--teal),var(--blue))}@media(max-width:880px){.hero,.controls,.result,.details{grid-template-columns:1fr}.badge{justify-self:start}.cars{grid-template-columns:repeat(4,minmax(0,1fr))}.panel+.panel{border-left:0;border-top:1px solid var(--line)}}@media(max-width:520px){.wrap{width:calc(100% - 18px);padding-top:12px}.hero h1{font-size:1.55rem}.rec-main strong{font-size:2rem}.cars{grid-template-columns:repeat(2,minmax(0,1fr))}.feedback{grid-template-columns:1fr}.data-row{grid-template-columns:1fr}.train-head{display:grid;align-items:start}}
+:root{--bg:#f5f7f4;--ink:#16211d;--muted:#61706a;--line:#d6dfda;--panel:#fff;--green:#18724f;--blue:#2e6d9d;--amber:#b87713;--red:#a63242;--soft:#edf4ef;--shadow:0 16px 38px rgba(24,38,31,.12)}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI","Yu Gothic",Meiryo,sans-serif}button,select,input{font:inherit}.wrap{width:min(1080px,calc(100% - 28px));margin:0 auto;padding:22px 0 38px}.head{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start;padding:12px 0 16px}.head h1{margin:4px 0 8px;font-size:2rem;line-height:1.1}.eyebrow,.label{margin:0;color:var(--muted);font-size:.78rem;font-weight:800}.copy{margin:0;max-width:760px;color:var(--muted);line-height:1.65}.badge{border:1px solid var(--line);border-radius:999px;background:#fff;padding:8px 12px;color:var(--green);font-weight:800;white-space:nowrap}.panel{border:1px solid var(--line);border-radius:8px;background:#fff;box-shadow:var(--shadow)}.controls{display:grid;grid-template-columns:1.1fr .8fr .8fr auto;gap:12px;padding:14px}.field{display:grid;gap:6px}.field span{color:var(--muted);font-size:.78rem;font-weight:800}.seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;border:1px solid var(--line);border-radius:8px;background:#f0f4f2;padding:4px}.seg button,.primary{border:0;border-radius:6px;font-weight:800;min-height:42px}.seg button{background:transparent;color:var(--muted);cursor:pointer}.seg button.active{background:#fff;color:var(--green);box-shadow:0 2px 9px rgba(26,70,47,.12)}select,input{width:100%;min-height:44px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink);padding:0 12px}.primary{align-self:end;background:var(--green);color:#fff;padding:0 18px;cursor:pointer}.status{display:grid;grid-template-columns:1fr 330px;margin:16px 0;overflow:hidden}.status-main{padding:20px}.status-main strong{display:block;margin:4px 0 10px;font-size:2.05rem;color:var(--red);line-height:1.15}.status-main p{margin:0;color:var(--muted);line-height:1.65}.facts{border-left:1px solid var(--line)}.facts div{display:grid;gap:5px;align-content:center;min-height:74px;padding:14px 16px;border-top:1px solid var(--line)}.facts div:first-child{border-top:0}.facts span{color:var(--muted);font-size:.78rem;font-weight:800}.facts b{font-size:1rem}.cars{padding:18px}.cars-head{display:flex;justify-content:space-between;gap:16px;align-items:end;margin-bottom:14px}.cars-head h2{margin:3px 0 0;font-size:1.08rem}.grid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px}.car{display:grid;grid-template-rows:auto auto 1fr auto;gap:7px;min-height:160px;padding:11px 9px;border:1px solid var(--line);border-radius:8px;background:#fbfcfb;color:var(--ink)}.car.stale{opacity:.55}.num{display:flex;justify-content:space-between;gap:6px;align-items:baseline}.num strong{font-size:1.2rem}.score{color:var(--muted);font-size:.78rem}.meter{min-height:54px;border-radius:7px;background:linear-gradient(to top,var(--c)var(--fill),transparent var(--fill)),#e8eeeb}.level{min-height:34px;font-size:.78rem;font-weight:800;line-height:1.35}.details{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:16px;overflow:hidden}.details section{padding:18px}.details section+section{border-left:1px solid var(--line)}.details p{margin:8px 0 0;color:var(--muted);line-height:1.65}.code{font-family:Consolas,monospace;font-size:.86rem;white-space:pre-wrap;background:#f7faf8;border:1px solid var(--line);border-radius:7px;padding:12px;color:#26312d;overflow:auto}@media(max-width:880px){.head,.controls,.status,.details{grid-template-columns:1fr}.badge{justify-self:start}.facts{border-left:0;border-top:1px solid var(--line)}.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.details section+section{border-left:0;border-top:1px solid var(--line)}}@media(max-width:520px){.wrap{width:calc(100% - 18px)}.head h1{font-size:1.55rem}.status-main strong{font-size:1.55rem}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 </head>
 <body>
 <main class="wrap">
-<section class="hero">
+<header class="head">
 <div>
-<p class="eyebrow">非公式・JRリアルタイムデータ未接続</p>
-<h1>武蔵野線 空き号車予測</h1>
-<p class="notice">東浦和駅と南流山駅の移動向けMVPです。JR東日本の混雑情報、運行システム、アプリ表示は取得していません。時刻・方向・号車の仮係数・この端末の報告だけで推定します。</p>
+<p class="eyebrow">JR公式速報値のみを表示</p>
+<h1>武蔵野線 JR速報値監視</h1>
+<p class="copy">東浦和-南流山の双方向に対応。JR公式由来の速報値が取れた時だけ号車別混雑を表示します。推定値や端末内の仮係数は使いません。</p>
 </div>
-<p class="badge">静的HTMLのみ</p>
-</section>
+<p class="badge">RawGitHack 静的HTML</p>
+</header>
 
-<section class="controls" aria-label="条件">
-<div class="field">
-<span>方向</span>
-<div class="seg" role="group" aria-label="方向">
-<button type="button" class="active" data-direction="eastToNagareyama">東浦和 → 南流山</button>
-<button type="button" data-direction="nagareyamaToEast">南流山 → 東浦和</button>
-</div>
-</div>
+<section class="panel controls" aria-label="監視条件">
+<div class="field"><span>方向</span><div class="seg"><button class="active" data-direction="eastToNagareyama" type="button">東浦和 → 南流山</button><button data-direction="nagareyamaToEast" type="button">南流山 → 東浦和</button></div></div>
 <label class="field"><span>発車時刻</span><input id="time" type="time" value="07:30"></label>
-<label class="field"><span>曜日</span><select id="day"><option value="weekday">平日</option><option value="holiday">土休日</option></select></label>
-<button id="judge" class="primary" type="button">判定</button>
+<label class="field"><span>監視間隔</span><select id="interval"><option value="30000">30秒</option><option value="60000" selected>60秒</option><option value="120000">120秒</option></select></label>
+<button id="refresh" class="primary" type="button">取得</button>
 </section>
 
-<section class="result" aria-live="polite">
-<div class="rec">
-<p class="label">おすすめ</p>
-<div class="rec-main"><strong id="bestCar">7号車</strong><span id="bestLevel">ゆったり立てる程度</span></div>
-<p id="reason" class="reason"></p>
+<section class="panel status" aria-live="polite">
+<div class="status-main">
+<p class="label">取得状態</p>
+<strong id="stateText">JR速報値の取得元が未設定</strong>
+<p id="stateDetail">このページはJR公式データを監視するための実装です。公開利用できるJR速報値エンドポイントが設定されていないため、号車推奨は出しません。</p>
 </div>
 <div class="facts">
-<div><span>選択中の移動</span><strong id="routeText">東浦和 → 南流山</strong></div>
-<div><span>列車方向</span><strong id="lineText">新松戸・西船橋方面</strong></div>
-<div><span>データ更新</span><strong id="dataText">端末内報告 0件</strong></div>
+<div><span>区間</span><b id="routeText">東浦和 → 南流山</b></div>
+<div><span>列車方向</span><b id="lineText">新松戸・西船橋方面</b></div>
+<div><span>最終取得</span><b id="lastText">未取得</b></div>
 </div>
 </section>
 
-<section class="train">
-<div class="train-head">
-<div><p class="label">8両編成</p><h2>号車別の混雑スコア</h2></div>
-<div class="route-line"><span id="fromStation">東浦和</span><i></i><span id="toStation">南流山</span></div>
-</div>
-<div id="cars" class="cars"></div>
+<section class="panel cars">
+<div class="cars-head"><div><p class="label">JR速報値</p><h2>号車別混雑</h2></div><p class="label" id="ageText">データなし</p></div>
+<div id="grid" class="grid"></div>
 </section>
 
-<section class="details">
-<div class="panel">
-<p class="label">選択中の号車</p>
-<h2 id="detailTitle">7号車</h2>
-<p id="detailBody"></p>
-<div class="feedback" aria-label="混雑報告">
-<button type="button" data-feedback="empty">空いてた</button>
-<button type="button" data-feedback="normal">普通</button>
-<button type="button" data-feedback="crowded">混んでた</button>
-</div>
-</div>
-<div class="panel">
-<p class="label">このMVPの前提</p>
-<div class="data-list">
-<div class="data-row"><b>JR取得</b><span>なし。5分前混雑などの公式データは使っていません。</span></div>
-<div class="data-row"><b>対象</b><span>東浦和-南流山の双方向。アプリ名も「むさしの号」ではなく武蔵野線に修正。</span></div>
-<div class="data-row"><b>次に必要</b><span>公式利用可能な時刻表データ、ホーム階段位置、実地観測、投稿をサーバー保存する仕組み。</span></div>
-</div>
-</div>
+<section class="panel details">
+<section>
+<p class="label">取得仕様</p>
+<p>このHTMLは <code>JR_FEED_URL</code> に設定されたJR公式由来のJSONを定期取得します。未設定または取得失敗時は、空いている号車を出しません。</p>
+</section>
+<section>
+<p class="label">想定JSON</p>
+<pre class="code">{
+  "source": "JR East official feed",
+  "updatedAt": "2026-07-10T07:25:00+09:00",
+  "trains": [
+    {
+      "direction": "eastToNagareyama",
+      "departure": "07:30",
+      "cars": [1,2,2,3,3,2,1,1]
+    }
+  ]
+}</pre>
+</section>
 </section>
 </main>
 <script>
 (()=>{
-const CARS=8,KEY='musashino-line-crowding-v2';
-const routes={
- eastToNagareyama:{from:'東浦和',to:'南流山',line:'新松戸・西船橋方面',baseBias:0.06,carBias:[-.04,-.06,.03,.1,.12,.03,-.1,-.07],reasons:['端寄りで乗車が分散する仮説です','端寄りで階段集中から外れる仮説です','中ほどで待機列が寄りやすい仮説です','中間寄りで乗車が集中しやすい仮説です','中間寄りで乗車が集中しやすい仮説です','混雑中心から少し外れる仮説です','階段集中から外れやすい仮説です','後方端で分散しやすい仮説です']},
- nagareyamaToEast:{from:'南流山',to:'東浦和',line:'南浦和・府中本町方面',baseBias:0,carBias:[-.08,-.1,.02,.11,.1,.04,-.04,-.02],reasons:['端寄りで分散しやすい仮説です','端寄りで比較的余裕が出やすい仮説です','中ほどに流入しやすい仮説です','乗換客が寄りやすい仮説です','中間車で待ち位置が重なる仮説です','中間から少し外れる仮説です','端寄りで分散する仮説です','端寄りですが終端側待機が出る仮説です']}
-};
-const levels=[{m:36,n:'座れる可能性あり',c:'#18724f'},{m:52,n:'ゆったり立てる程度',c:'#2e6d9d'},{m:68,n:'少し混み合う',c:'#b87713'},{m:82,n:'肩が触れやすい',c:'#c6562b'},{m:101,n:'かなり混み合う',c:'#a63242'}];
-let state={direction:'eastToNagareyama',day:'weekday',time:'07:30',selected:7,results:[]};
+const JR_FEED_URL='';
+const routes={eastToNagareyama:{from:'東浦和',to:'南流山',line:'新松戸・西船橋方面'},nagareyamaToEast:{from:'南流山',to:'東浦和',line:'南浦和・府中本町方面'}};
+const levelMap={1:['空き','25%','#18724f'],2:['やや空き','42%','#2e6d9d'],3:['普通','58%','#b87713'],4:['混雑','76%','#c6562b'],5:['高混雑','92%','#a63242']};
+let state={direction:'eastToNagareyama',timer:null,last:null};
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
-function mins(t){const [h,m]=t.split(':').map(Number);return h*60+m}function level(score){return levels.find(x=>score<x.m)||levels.at(-1)}
-function store(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}function save(v){try{localStorage.setItem(KEY,JSON.stringify(v))}catch(e){}}
-function fkey(car){return [state.direction,state.day,state.time,car].join(':')}function feedback(car){return store()[fkey(car)]||{empty:0,normal:0,crowded:0}}
-function adjust(car){const f=feedback(car),n=f.empty+f.normal+f.crowded;if(!n)return 0;return Math.max(-12,Math.min(12,(-10*f.empty+12*f.crowded)/n))}
-function totalReports(){let n=0;for(let c=1;c<=CARS;c++){const f=feedback(c);n+=f.empty+f.normal+f.crowded}return n}
-function loadByTime(t,day,dir){const h=mins(t)/60;let base;if(day==='holiday'){base=h<7?.28:h<10?.42:h<16?.5:h<19?.56:h<21?.45:.34}else{base=h<6.5?.34:h<7.25?.62:h<8.75?.86:h<10?.58:h<16?.42:h<17.5?.5:h<19.5?.7:h<21.5?.52:.38}return base+routes[dir].baseBias}
-function noise(t,car){let h=0,s=state.direction+state.day+t+car;for(let i=0;i<s.length;i++)h=(h*33+s.charCodeAt(i))%10007;return (h/10007-.5)*.07}
-function calc(){const r=routes[state.direction],base=loadByTime(state.time,state.day,state.direction);state.results=Array.from({length:CARS},(_,i)=>{const car=i+1,score=Math.round(Math.max(18,Math.min(96,(base+r.carBias[i]+noise(state.time,car))*100+adjust(car))));return{car,score,level:level(score),reason:r.reasons[i]}})}
-function best(){return [...state.results].sort((a,b)=>a.score-b.score||a.car-b.car)[0]}function confidence(){const n=totalReports();if(n>=8)return'高';if(n>=3)return'中';return'低'}
-function render(){calc();const b=best(),r=routes[state.direction];if(!state.results.some(x=>x.car===state.selected))state.selected=b.car;$('#bestCar').textContent=b.car+'号車';$('#bestLevel').textContent=b.level.n;$('#reason').textContent=b.reason+' 時間帯、方向、号車別の仮係数、この端末の報告から推定しています。JRの実測混雑ではありません。信頼度は'+confidence()+'です。';$('#routeText').textContent=r.from+' → '+r.to;$('#lineText').textContent=r.line;$('#dataText').textContent='端末内報告 '+totalReports()+'件';$('#fromStation').textContent=r.from;$('#toStation').textContent=r.to;$('#cars').innerHTML='';state.results.forEach(x=>{const btn=document.createElement('button');btn.type='button';btn.className='car'+(x.car===state.selected?' selected':'')+(x.car===b.car?' best':'');btn.style.setProperty('--fill',x.score+'%');btn.style.setProperty('--c',x.level.c);btn.innerHTML='<div class="num"><strong>'+x.car+'号車</strong><span>'+(x.car===b.car?'推奨':'')+'</span></div><div class="score">'+x.score+'/100</div><div class="meter" aria-hidden="true"></div><div class="level">'+x.level.n+'</div>';btn.onclick=()=>{state.selected=x.car;render()};$('#cars').appendChild(btn)});const s=state.results.find(x=>x.car===state.selected)||b,f=feedback(s.car),n=f.empty+f.normal+f.crowded;$('#detailTitle').textContent=s.car+'号車';$('#detailBody').textContent=s.level.n+'の予測です。スコアは'+s.score+'/100。'+s.reason+' この号車への端末内報告は'+n+'件です。'}
-$$('[data-direction]').forEach(btn=>btn.onclick=()=>{$$('[data-direction]').forEach(b=>b.classList.toggle('active',b===btn));state.direction=btn.dataset.direction;state.selected=best().car;render()});$('#day').onchange=e=>{state.day=e.target.value;render()};$('#time').onchange=e=>{state.time=e.target.value||'07:30';render()};$('#judge').onclick=()=>{state.time=$('#time').value||'07:30';render()};$$('[data-feedback]').forEach(btn=>btn.onclick=()=>{const data=store(),key=fkey(state.selected);data[key]=data[key]||{empty:0,normal:0,crowded:0};data[key][btn.dataset.feedback]++;save(data);render()});render();
+function route(){return routes[state.direction]}function setStatus(text,detail,ok=false){$('#stateText').textContent=text;$('#stateText').style.color=ok?'#18724f':'#a63242';$('#stateDetail').textContent=detail}
+function renderRoute(){const r=route();$('#routeText').textContent=r.from+' → '+r.to;$('#lineText').textContent=r.line}
+function renderEmpty(){const g=$('#grid');g.innerHTML='';for(let i=1;i<=8;i++){const el=document.createElement('div');el.className='car stale';el.innerHTML='<div class="num"><strong>'+i+'号車</strong><span>未取得</span></div><div class="score">JR速報値なし</div><div class="meter" style="--fill:0%;--c:#d6dfda"></div><div class="level">表示不可</div>';g.appendChild(el)}}
+function renderCars(cars,updatedAt){const g=$('#grid');g.innerHTML='';let best={car:null,v:99};cars.forEach((v,i)=>{if(v<best.v)best={car:i+1,v}});cars.forEach((v,i)=>{const [name,fill,color]=levelMap[v]||levelMap[5],el=document.createElement('div');el.className='car'+(i+1===best.car?' best':'');el.innerHTML='<div class="num"><strong>'+(i+1)+'号車</strong><span>'+(i+1===best.car?'最小':'')+'</span></div><div class="score">JR '+v+'/5</div><div class="meter" style="--fill:'+fill+';--c:'+color+'"></div><div class="level">'+name+'</div>';g.appendChild(el)});$('#lastText').textContent=new Date(updatedAt).toLocaleString('ja-JP');$('#ageText').textContent='JR更新: '+new Date(updatedAt).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});setStatus(best.car+'号車が最小混雑','JR公式由来フィードの号車別速報値だけで判定しました。',true)}
+function selectTrain(feed){const time=$('#time').value;return (feed.trains||[]).find(t=>t.direction===state.direction&&t.departure===time&&Array.isArray(t.cars)&&t.cars.length>=8)}
+async function fetchJR(){renderRoute();if(!JR_FEED_URL){state.last=null;$('#lastText').textContent='未取得';$('#ageText').textContent='データなし';setStatus('JR速報値の取得元が未設定','JR_FEED_URL が空です。JR公式由来の取得先が設定されるまで、号車推奨は出しません。');renderEmpty();return}try{const res=await fetch(JR_FEED_URL,{cache:'no-store'});if(!res.ok)throw new Error('HTTP '+res.status);const feed=await res.json();const train=selectTrain(feed);if(!train){setStatus('対象列車のJR速報値なし','取得は成功しましたが、選択した方向・発車時刻の号車別速報値がありません。');renderEmpty();return}renderCars(train.cars,feed.updatedAt||Date.now())}catch(e){setStatus('JR速報値の取得失敗',String(e.message||e));renderEmpty()}}
+function restart(){clearInterval(state.timer);fetchJR();state.timer=setInterval(fetchJR,Number($('#interval').value))}
+$$('[data-direction]').forEach(b=>b.onclick=()=>{$$('[data-direction]').forEach(x=>x.classList.toggle('active',x===b));state.direction=b.dataset.direction;restart()});$('#refresh').onclick=restart;$('#interval').onchange=restart;$('#time').onchange=restart;renderRoute();renderEmpty();restart();
 })();
 </script>
 </body>
