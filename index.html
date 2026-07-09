@@ -1,43 +1,52 @@
-<!doctype html>
-<html lang="ja">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>将棋 AI 対局</title>
-<style>
-body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:"Yu Gothic",Meiryo,system-ui,sans-serif;background:#f8f3eb;color:#211a15}.loading{padding:24px;text-align:center}.loading strong{display:block;margin-bottom:8px;font-size:1.1rem}.loading a{color:#177265}
-</style>
-</head>
-<body>
-<div class="loading"><strong>将棋 AI 対局を読み込み中</strong><span>更新版を準備しています。</span></div>
-<script>
+<!doctype html><html lang='ja'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>将棋 AI 対局</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:'Yu Gothic',Meiryo,system-ui,sans-serif;background:#f8f3eb;color:#211a15}.loading{padding:24px;text-align:center}.loading strong{display:block;margin-bottom:8px;font-size:1.1rem}.loading a{color:#177265}</style></head><body><div class='loading'><strong>将棋 AI 対局を読み込み中</strong><span>強化版を準備しています。</span></div><script>
 (async()=>{
-  const source="https://raw.githack.com/Orleanais360020/Silencebeat/823a4ee5f44c1d12ec1f17ef992641cfb10963be/index.html";
-  try{
-    let html=await (await fetch(source,{cache:"reload"})).text();
-    html=html.replace(
-      '.review-item p{margin:4px 0 0;font-size:.9rem;line-height:1.48}@media(max-width:900px)',
-      '.review-item p{margin:4px 0 0;font-size:.9rem;line-height:1.48}#lessonpanel:not([hidden]){order:-2}@media(max-width:900px)'
-    );
-    html=html.replace(
-      'function render(){renderReview();renderBoard();',
-      'function render(){if(over&&!review.length&&hist.length)makeReview("対局終了。ここまでの指し手から講評します");renderReview();renderBoard();'
-    );
-    html=html.replace(
-      'function done(){if(over)return true;const ms=legal(g.turn,1);',
-      'function done(){if(over){if(!review.length&&hist.length)makeReview("対局終了。ここまでの指し手から講評します");render();return true}const ms=legal(g.turn,1);'
-    );
-    html=html.replace(
-      '}catch(e){over=true;add([`AI思考で問題が出ました: ${e.message}`])}finally{thinking=false;clear();render();done()}',
-      '}catch(e){over=true;add([`AI思考で問題が出ました: ${e.message}`]);if(!review.length&&hist.length)makeReview("AI思考で止まりました。ここまでの指し手から講評します")}finally{thinking=false;clear();render();done()}'
-    );
-    document.open();
-    document.write(html);
-    document.close();
-  }catch(e){
-    document.body.innerHTML=`<div class="loading"><strong>読み込みに失敗しました</strong><span>${String(e.message||e)}</span><p><a href="${source}">前の版を開く</a></p></div>`;
-  }
+const source='https://raw.githack.com/Orleanais360020/Silencebeat/823a4ee5f44c1d12ec1f17ef992641cfb10963be/index.html';
+function patch(h,from,to,name){if(!h.includes(from)){console.warn('patch skipped',name);return h}return h.replace(from,to)}
+function block(h,start,end,rep,name){const i=h.indexOf(start);if(i<0){console.warn('block start skipped',name);return h}const j=h.indexOf(end,i);if(j<0){console.warn('block end skipped',name);return h}return h.slice(0,i)+rep+h.slice(j)}
+try{
+let html=await (await fetch(source,{cache:'reload'})).text();
+html=patch(html,'.review-item p{margin:4px 0 0;font-size:.9rem;line-height:1.48}@media(max-width:900px)','.review-item p{margin:4px 0 0;font-size:.9rem;line-height:1.48}#lessonpanel:not([hidden]){order:-2}@media(max-width:900px)','review-order');
+html=patch(html,'deadline=0,nodes=0;','deadline=0,nodes=0,tt=new Map();','tt-state');
+html=block(html,'function evalFor(c){','function key(m){',`function evalFor(c){
+ const pc={B:{},W:{}},kings={B:null,W:null};
+ for(let x=1;x<=9;x++)for(let y=1;y<=9;y++){const p=g.get(x,y);if(!p)continue;const s=p.color===B?'B':'W';if(p.kind==='FU')pc[s][x]=(pc[s][x]||0)+1;if(p.kind==='OU')kings[s]={x,y}}
+ let score=0;
+ for(let x=1;x<=9;x++)for(let y=1;y<=9;y++){const p=g.get(x,y);if(!p)continue;const sign=p.color===c?1:-1,side=p.color===B?'B':'W';let piece=(val[p.kind]||0)+pos(p,x,y);const mob=g.getMovesFrom(x,y).length;if(['HI','RY','KA','UM'].includes(p.kind))piece+=mob*8;else if(p.kind!=='OU')piece+=mob*3;if(zone(p.color,y)&&prom.has(p.kind))piece+=90;if(promed.has(p.kind))piece+=130;if(p.kind==='FU'&&pc[side][x]>1)piece-=35;if(p.kind==='OU')piece+=shelter(p.color,x,y)*2;score+=sign*piece}
+ const phase=Math.min(1,hist.length/52+.15);for(const side of[B,W]){const sign=side===c?1:-1,hs=g.getHandsSummary(side);for(const k of raw){const n=hs[k]||0;if(!n)continue;const bonus=k==='FU'?35:k==='KI'||k==='GI'?95:k==='KA'||k==='HI'?150:60;score+=sign*n*((hv[k]||0)+bonus*phase)}}
+ if(kings[c===B?'B':'W'])score+=shelter(c,kings[c===B?'B':'W'].x,kings[c===B?'B':'W'].y);const oc=opp(c),ok=kings[oc===B?'B':'W'];if(ok)score-=shelter(oc,ok.x,ok.y);if(g.isCheck(opp(c)))score+=260;if(g.isCheck(c))score-=320;return Math.round(score)}
+`,'eval');
+html=block(html,'function mh(m){','const files=',`function mh(m){let s=0;if(m.t==='m'){const p=g.get(m.fx,m.fy),t=g.get(m.tx,m.ty);if(t)s+=(val[t.kind]||0)*16-(val[p.kind]||0);if(m.pr)s+=850;if(promed.has(p.kind))s+=90;s-=dist(opp(p.color),{x:m.tx,y:m.ty})*12;if(zone(p.color,m.ty))s+=70}else{s+=(hv[m.k]||0)*3-dist(opp(m.c),{x:m.tx,y:m.ty})*18;if(m.k==='KI'||m.k==='GI')s+=170;if(m.k==='KA'||m.k==='HI')s+=210}return s}
+function order(ms,pref=null){const pk=pref&&key(pref);return[...ms].sort((a,b)=>pk&&key(a)===pk?-1:pk&&key(b)===pk?1:mh(b)-mh(a))}
+function terminal(root,ply){if(g.isCheck(g.turn))return g.turn===root?-999999+ply:999999-ply;return 0}function tick(){nodes++;if((nodes&511)===0&&Date.now()>deadline)throw Error('timeout')}
+function boardSig(){let s=g.turn===B?'B':'W';for(let x=1;x<=9;x++)for(let y=1;y<=9;y++){const p=g.get(x,y);if(p)s+='|'+x+y+(p.color===B?'B':'W')+p.kind}for(const side of[B,W]){const hs=g.getHandsSummary(side);s+='|H'+(side===B?'B':'W');for(const k of raw)s+=k+(hs[k]||0)}return s}
+function qsearch(alpha,beta,root,ply){tick();const ms0=legal(g.turn);if(!ms0.length)return terminal(root,ply);let stand=evalFor(root);if(ply>5)return stand;const inCheck=g.isCheck(g.turn);if(!inCheck){if(g.turn===root){if(stand>=beta)return stand;alpha=Math.max(alpha,stand)}else{if(stand<=alpha)return stand;beta=Math.min(beta,stand)}}const ms=(inCheck?order(ms0).slice(0,28):order(ms0).filter(m=>m.cap||m.pr).slice(0,18));if(!ms.length)return stand;if(g.turn===root){let best=stand;for(const m of ms){const u=apply(m);let sc;try{sc=qsearch(alpha,beta,root,ply+1)}finally{undo(m,u)}best=Math.max(best,sc);alpha=Math.max(alpha,best);if(alpha>=beta)break}return best}else{let best=stand;for(const m of ms){const u=apply(m);let sc;try{sc=qsearch(alpha,beta,root,ply+1)}finally{undo(m,u)}best=Math.min(best,sc);beta=Math.min(beta,best);if(alpha>=beta)break}return best}}
+function ab(depth,alpha,beta,root,ply){tick();const k=boardSig()+'|'+depth+'|'+(root===B?'B':'W');const hit=tt.get(k);if(hit&&hit.d>=depth)return hit.v;const ms=order(legal(g.turn));if(!ms.length)return terminal(root,ply);if(depth<=0&&!g.isCheck(g.turn))return qsearch(alpha,beta,root,ply);let best;if(g.turn===root){best=-1e9;for(const m of ms){const u=apply(m);let sc;try{sc=ab(depth-1,alpha,beta,root,ply+1)}finally{undo(m,u)}best=Math.max(best,sc);alpha=Math.max(alpha,best);if(alpha>=beta)break}}else{best=1e9;for(const m of ms){const u=apply(m);let sc;try{sc=ab(depth-1,alpha,beta,root,ply+1)}finally{undo(m,u)}best=Math.min(best,sc);beta=Math.min(beta,best);if(alpha>=beta)break}}if(tt.size>60000)tt.clear();tt.set(k,{d:depth,v:best});return best}
+function searchSide(side,level){const cfg=level==='coach'?{max:2,ms:360,label:'候補'}:level==='medium'?{max:3,ms:1400,label:'中間'}:{max:5,ms:5400,label:'最大'};let ms=order(legal(side));if(!ms.length)return{move:null,depth:0,nodes:0,score:terminal(side,0),level:cfg.label};deadline=Date.now()+cfg.ms;nodes=0;tt=new Map();let best=ms[0],score=evalFor(side),done=0;for(let d=1;d<=cfg.max;d++){try{let lb=best,ls=-1e9,a=-1e9;for(const m of order(ms,best)){const u=apply(m);let sc;try{sc=ab(d-1,a,1e9,side,1)}finally{undo(m,u)}if(sc>ls){ls=sc;lb=m}a=Math.max(a,ls)}best=lb;score=ls;done=d}catch(e){break}}return{move:best,depth:done,nodes,score,level:cfg.label}}
+function search(level){return searchSide(A,level)}function coachBest(side){try{const r=searchSide(side,'coach');return r&&r.move?{n:fmt(r.move),score:r.score,depth:r.depth}:null}catch(e){return null}}
+`,'search');
+html=block(html,'function add(lines){','function material(c){',`function add(lines){const time=new Intl.DateTimeFormat('ja-JP',{hour:'2-digit',minute:'2-digit'}).format(new Date());comments=[{time,lines},...comments].slice(0,8);renderLog()}
+function commentary(lastText,res){const hs=evalFor(H),mat=material(H),h=hist[hist.length-1],lines=[];if(!h){lines.push(adv(hs)+'。序盤は玉を薄くしすぎず、飛角銀の働きを作る方針です');lines.push('疑問手の判定には、各手の直前に読んだ候補手との差も使います')}else if(h.by==='H'){const loss=h.loss==null?Math.max(0,-h.delta):Math.max(0,h.loss);if(loss>=380)lines.push('直近の'+h.n+'は大きく評価を落としました。候補は'+(h.coach?h.coach.n:'別の受け')+'で、今は'+adv(hs));else if(loss>=160)lines.push('直近の'+h.n+'は少し疑問です。候補は'+(h.coach?h.coach.n:'より自然な手')+'で、狙いを残しやすい局面でした');else lines.push('直近の'+h.n+'は悪くありません。'+adv(hs));lines.push(reviewHint(h))}else{if(h.delta<=-300)lines.push('AIの'+h.n+'でAI側に流れました。受けるべき脅威が具体化しています');else lines.push('AIの'+h.n+'。'+adv(hs));lines.push(reviewHint(h))}if(g.isCheck(g.turn))lines.push(cname(g.turn)+'玉に王手です。王手を消すだけでなく、次の詰めろや大駒取りも確認したい局面です');else if(Math.abs(mat)>=300)lines.push('駒割りは'+(mat>0?'あなた':'AI')+'が得です。ただし玉の安全と大駒の働きが評価を左右します');if(res&&res.move)lines.push('AIは'+res.depth+'手先まで読み、'+res.nodes.toLocaleString('ja-JP')+'局面を調べました');return lines}
+`,'commentary');
+html=block(html,'function renderLog(){','function renderBoard(){',`function renderLog(){q('#log').innerHTML=comments.map(e=>'<article class="entry"><span class="time">'+e.time+'</span>'+e.lines.map(l=>'<p>'+esc(l)+'</p>').join('')+'</article>').join('')}
+function renderReview(){const panel=q('#lessonpanel');if(!panel)return;panel.hidden=!review.length;q('#reviewState').textContent=review.length?'終局後の講評':'終局後';q('#review').innerHTML=review.length?review.map(r=>'<article class="review-item"><span class="review-tag">'+esc(r.tag)+'</span><h3>'+esc(r.title)+'</h3><p>'+esc(r.text)+'</p></article>').join(''):'<p class="empty">対局後に重要な手を講評します</p>'}
+function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+function render(){if(over&&!review.length&&hist.length)makeReview('対局終了。ここまでの指し手から講評します');renderReview();renderBoard();renderHand(q('#whand'),W);renderHand(q('#bhand'),B);const hs=evalFor(H),p=pct(hs);q('#evalpanel').hidden=!q('#showbar').checked;q('#score').textContent=scoreText(hs);q('#fill').style.left=Math.min(50,p)+'%';q('#fill').style.width=Math.abs(p-50)+'%';q('#turn').textContent=over?'対局終了':thinking?'AI思考中':g.turn===H?'あなたの手番':'AIの手番';q('#dot').classList.toggle('on',thinking);q('#depth').textContent=searchText;q('#count').textContent=hist.length+'手';q('#moves').innerHTML=hist.map((m,i)=>'<li>'+(i+1)+'. '+m.side+' '+m.n+'</li>').join('');const rb=q('#resign');if(rb)rb.disabled=over||thinking||hist.length===0}
+`,'render');
+html=block(html,'function canAct(){','function human(ms){',`function canAct(){return g.turn===H&&!thinking&&!over}function clear(){sel=null;selMoves=[]}function hand(k){if(!canAct())return;sel={type:'hand',k};selMoves=legal(H).filter(m=>m.t==='d'&&m.k===k);render()}function cell(x,y){if(!canAct())return;const targets=selMoves.filter(m=>m.tx===x&&m.ty===y);if(targets.length){human(targets);return}const p=g.get(x,y);if(p&&p.color===H){sel={type:'board',x,y};selMoves=legal(H).filter(m=>m.t==='m'&&m.fx===x&&m.fy===y)}else clear();render()}
+function moveFlags(m){const a=[];if(m.cap)a.push(pl(m.cap)+'を取った');if(m.pr)a.push('成った');if(m.t==='d')a.push(pl(m.k,m.c||H)+'打ち');if(g.isCheck(g.turn))a.push('王手');return a}
+function remember(side,m,n,before,after,res=null,coach=null){const loss=coach&&side===H?Math.round(coach.score-after):null;const h={no:hist.length+1,side:cname(side),by:side===H?'H':'A',n,before,after,delta:after-before,flags:moveFlags(m),depth:res&&res.depth||0,nodes:res&&res.nodes||0,coach,loss};hist.push(h);return h}
+function reviewHint(h){if(h.by==='H'&&h.coach&&h.loss>420)return'推奨は'+h.coach.n+'。実戦手は直後の王手、駒損、または大駒の働きで損をしています';if(h.by==='H'&&h.coach&&h.loss>160)return'候補は'+h.coach.n+'。実戦手よりも玉の安全か次の攻め筋を残しやすい手でした';if(h.flags.includes('王手')&&h.delta>0)return'王手で相手の応手を限定できています。連続王手だけでなく、詰めろや駒得に切り替える余地もあります';if(h.flags.some(f=>f.includes('取った'))&&h.delta<0)return'駒を取った手ですが、取り返しや王手筋で評価を落としています。駒得だけで判断しない方が安定します';if(h.flags.includes('成った')&&h.delta>=0)return'成り駒を作って攻めの継続性が上がりました';if(h.flags.some(f=>f.includes('打ち'))&&h.delta<0)return'持ち駒投入の効率が課題です。その駒が次にも働くかを確認したい局面です';return h.delta>=0?'形勢を損ねず、次の狙いを残せています':'受け、玉の逃げ道、大駒の閉じ込められを先に確認したい局面です'}
+function reviewItem(tag,title,text){return{tag,title,text}}function swing(h){const base='評価は'+(h.delta>=0?'+':'')+(h.delta/100).toFixed(1)+'点分動き、現在は'+scoreText(h.after)+'。';return h.by==='H'&&h.coach?base+'候補手との差は'+(Math.max(0,h.loss)/100).toFixed(1)+'点。':base}
+function makeReview(resultMsg){if(review.length)return;const human=hist.filter(h=>h.by==='H'),aiMoves=hist.filter(h=>h.by==='A'),picked=[reviewItem('結果','対局結果',resultMsg)];const miss=[...human].filter(h=>(h.loss!=null?Math.max(0,h.loss):Math.max(0,-h.delta))>=160).sort((a,b)=>(b.loss||-b.delta)-(a.loss||-a.delta)).slice(0,2);for(const h of miss)picked.push(reviewItem((h.loss||0)>=420?'重要なミス':'注意点',h.no+'手目 '+h.n,swing(h)+' '+reviewHint(h)));const good=[...human].filter(h=>(h.loss==null||h.loss<120)&&h.delta>-120).sort((a,b)=>(b.delta-a.delta)).slice(0,2);for(const h of good)picked.push(reviewItem('良かった手',h.no+'手目 '+h.n,swing(h)+' '+reviewHint(h)));const enemy=[...aiMoves].filter(h=>h.delta<=-180).sort((a,b)=>a.delta-b.delta).slice(0,1);for(const h of enemy)picked.push(reviewItem('相手の好手',h.no+'手目 AIの'+h.n,'ここでAI側に流れました。'+reviewHint(h)));if(picked.length===1&&human.length){const h=[...human].sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta))[0];picked.push(reviewItem('振り返り',h.no+'手目 '+h.n,swing(h)+' '+reviewHint(h)))}picked.push(reviewItem('次の課題','次に意識すること','候補手との差が大きい局面では、1. 王手の有無、2. 自玉の逃げ道、3. 大駒の働き、4. その駒が次も働くか、の順で確認するとミスが減ります'));review=picked.slice(0,6);renderReview()}
+function resign(){if(over||!hist.length)return;over=true;thinking=false;const msg='あなたが投了しました。ここまでの指し手から講評します';add([msg]);makeReview(msg);clear();render()}
+`,'coach');
+html=block(html,'function human(ms){','function done(){',`function human(ms){let m=ms.length>1?(confirm('成りますか？')?ms.find(x=>x.pr):ms.find(x=>!x.pr)):ms[0];const before=evalFor(H),coach=coachBest(H),n=fmt(m);apply(m);const after=evalFor(H);last=m;remember(H,m,n,before,after,null,coach);clear();searchText='';render();if(done())return;add(commentary('あなたの'+n));setTimeout(ai,80)}
+`,'human');
+html=block(html,'function done(){','function ai(){',`function done(){if(over){if(!review.length&&hist.length)makeReview('対局終了。ここまでの指し手から講評します');render();return true}const ms=legal(g.turn,1);if(ms.length)return false;over=true;const msg=g.isCheck(g.turn)?cname(g.turn)+'玉が詰みました。'+cname(g.turn===H?A:H)+'の勝ちです':cname(g.turn)+'に合法手がありません';add([msg]);makeReview(msg);render();return true}
+`,'done');
+html=block(html,'function ai(){','function start(){',`function ai(){if(g.turn!==A||over)return;thinking=true;render();setTimeout(()=>{if(over){thinking=false;render();return}try{const before=evalFor(H),res=search(q('#level').value);if(!res.move){done();return}const n=fmt(res.move);apply(res.move);const after=evalFor(H);last=res.move;remember(A,res.move,n,before,after,res);searchText=res.level+' '+res.depth+'手読み';add(commentary('AIの'+n,res))}catch(e){over=true;add(['AI思考で問題が出ました: '+e.message]);if(!review.length&&hist.length)makeReview('AI思考で止まりました。ここまでの指し手から講評します')}finally{thinking=false;clear();render();done()}},30)}
+`,'ai');
+document.open();document.write(html);document.close();
+}catch(e){document.body.innerHTML='<div class="loading"><strong>読み込みに失敗しました</strong><span>'+String(e.message||e)+'</span><p><a href="'+source+'">前の版を開く</a></p></div>'}
 })();
-</script>
-</body>
-</html>
+</script></body></html>
