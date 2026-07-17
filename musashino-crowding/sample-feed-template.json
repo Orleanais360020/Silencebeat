@@ -1,0 +1,27 @@
+{
+  "source": "SAMPLE TEMPLATE - NOT REAL JR DATA",
+  "licensed": false,
+  "updatedAt": "2026-07-17T08:00:00+09:00",
+  "trains": [
+    {
+      "trainId": "sample-001",
+      "line": "武蔵野線",
+      "serviceName": "普通",
+      "direction": "higashiurawa-minaminagareyama",
+      "fromStation": "東浦和",
+      "toStation": "南流山",
+      "departureTime": "08:12",
+      "crowdingLevel": 3,
+      "cars": [
+        { "carNumber": 1, "crowdingLevel": 2, "note": "sample only" },
+        { "carNumber": 2, "crowdingLevel": 3, "note": "sample only" },
+        { "carNumber": 3, "crowdingLevel": 4, "note": "sample only" },
+        { "carNumber": 4, "crowdingLevel": 4, "note": "sample only" },
+        { "carNumber": 5, "crowdingLevel": 3, "note": "sample only" },
+        { "carNumber": 6, "crowdingLevel": 2, "note": "sample only" },
+        { "carNumber": 7, "crowdingLevel": 1, "note": "sample only" },
+        { "carNumber": 8, "crowdingLevel": 2, "note": "sample only" }
+      ]
+    }
+  ]
+}
